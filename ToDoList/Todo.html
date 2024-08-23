@@ -1,0 +1,234 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToDo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #todo-container {
+            background-color: #0f0a1d;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 400px;
+        }
+        #name {
+            padding: 10px;
+            width: 100%;
+            font-size: 16px;
+            border: 1px solid #e7ebeb;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        #btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #28a745;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        #btn:hover {
+            background-color: #218838;
+        }
+        #clear-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #ff6347;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #clear-btn:hover {
+            background-color: #ff4500;
+        }
+        #error {
+            color: red;
+            margin-top: 10px;
+        }
+        ol {
+            margin-top: 20px;
+            padding-left: 0;
+            list-style-position: inside;
+            color: #e7ebeb;
+        }
+        li {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .delete-btn, .edit-btn, .complete-btn {
+            margin-left: 10px;
+            padding: 5px 10px;
+            font-size: 14px;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .delete-btn {
+            background-color: #dc3545;
+        }
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+        .edit-btn {
+            background-color: #ffc107;
+        }
+        .edit-btn:hover {
+            background-color: #e0a800;
+        }
+        .complete-btn {
+            background-color: #28a745;
+        }
+        .complete-btn:hover {
+            background-color: #218838;
+        }
+        .completed {
+            text-decoration: line-through;
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+
+<div id="todo-container">
+    <input id="name" type="text" placeholder="Enter your Todo...">
+    <button id="btn" onclick="addTodo()">Add</button>
+    <button id="clear-btn" onclick="clearAll()">Clear All</button>
+    <p id="error"></p>
+    <ol id="box"></ol>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', loadTodos);
+
+function loadTodos() {
+    const todos = JSON.parse(localStorage.getItem('todos')) || [];
+    const box = document.getElementById('box');
+
+    todos.forEach(todo => {
+        const li = document.createElement('li');
+        li.textContent = todo.text;
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = "Delete";
+        deleteBtn.classList.add('delete-btn');
+
+        const editBtn = document.createElement('button');
+        editBtn.textContent = "Edit";
+        editBtn.classList.add('edit-btn');
+
+        const completeBtn = document.createElement('button');
+        completeBtn.textContent = "Complete";
+        completeBtn.classList.add('complete-btn');
+
+        li.appendChild(editBtn);
+        li.appendChild(completeBtn);
+        li.appendChild(deleteBtn);
+        box.appendChild(li);
+
+        if (todo.completed) {
+            li.classList.add('completed');
+        }
+
+        deleteBtn.addEventListener('click', () => {
+            li.remove();
+            saveTodos();
+        });
+
+        editBtn.addEventListener('click', () => {
+            document.getElementById('name').value = todo.text;
+            li.remove();
+            saveTodos();
+        });
+
+        completeBtn.addEventListener('click', () => {
+            li.classList.toggle('completed');
+            saveTodos();
+        });
+    });
+}
+
+function addTodo() {
+    document.getElementById('error').innerHTML = "";
+    const name = document.getElementById('name').value;
+
+    if (name.trim() === "") {
+        document.getElementById('error').innerHTML = "Please add something...";
+    } else {
+        const box = document.getElementById('box');
+        const li = document.createElement('li');
+        li.textContent = name;
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = "Delete";
+        deleteBtn.classList.add('delete-btn');
+
+        const editBtn = document.createElement('button');
+        editBtn.textContent = "Edit";
+        editBtn.classList.add('edit-btn');
+
+        const completeBtn = document.createElement('button');
+        completeBtn.textContent = "Complete";
+        completeBtn.classList.add('complete-btn');
+
+        li.appendChild(editBtn);
+        li.appendChild(completeBtn);
+        li.appendChild(deleteBtn);
+        box.appendChild(li);
+
+        deleteBtn.addEventListener('click', () => {
+            li.remove();
+            saveTodos();
+        });
+
+        editBtn.addEventListener('click', () => {
+            document.getElementById('name').value = name;
+            li.remove();
+            saveTodos();
+        });
+
+        completeBtn.addEventListener('click', () => {
+            li.classList.toggle('completed');
+            saveTodos();
+        });
+
+        document.getElementById('name').value = "";
+
+        saveTodos();
+    }
+}
+
+function saveTodos() {
+    const todos = [];
+    document.querySelectorAll('#box li').forEach(li => {
+        todos.push({
+            text: li.textContent.replace('DeleteEditComplete', ''),
+            completed: li.classList.contains('completed')
+        });
+    });
+    localStorage.setItem('todos', JSON.stringify(todos));
+}
+
+function clearAll() {
+    document.getElementById('box').innerHTML = "";
+    document.getElementById('error').innerHTML = "";
+    localStorage.removeItem('todos');
+}
+</script>
+</body>
+</html>
